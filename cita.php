@@ -1,61 +1,58 @@
 <?php
 $mensaje_estado = "";
 
-// Parsear la URL de conexión
-$mysql_url = "mysql://root:ugDjPlMtEaIeYiNhBuJFMrrjBRfmRKzT@yamanote.proxy.rlwy.net:50290/railway";
-$parts = parse_url($mysql_url);
-
-$host = $parts['host'];       // yamanote.proxy.rlwy.net
-$port = $parts['port'];       // 50290
-$db   = ltrim($parts['path'], '/'); // railway
-$user = $parts['user'];       // root
-$pass = $parts['pass'];       // ugDjPlMtEaIeYiNhBuJFMrrjBRfmRKzT
-
-// Conexión a MySQL
-$conn = new mysqli($host, $user, $pass, $db, $port);
-if ($conn->connect_error) {
-    die("Conexión fallida: " . $conn->connect_error);
-}
-
-// POST del formulario
 if($_SERVER["REQUEST_METHOD"] == "POST"){
+
     $nombre   = htmlspecialchars($_POST['nombre']);
     $telefono = htmlspecialchars($_POST['telefono']);
     $correo   = htmlspecialchars($_POST['correo']);
-    $fecha    = $_POST['fecha'];
-    $hora     = $_POST['hora'];
+    $fecha    = htmlspecialchars($_POST['fecha']);
+    $hora     = htmlspecialchars($_POST['hora']);
 
-    // Validaciones
-    if(!filter_var($correo, FILTER_VALIDATE_EMAIL)){
-        $mensaje_estado = "<p style='color:red;'>Correo inválido ❌</p>";
-    } elseif(strtotime("$fecha $hora") < time()){
-        $mensaje_estado = "<p style='color:red;'>No se puede agendar en el pasado ❌</p>";
-    } else {
-        // Revisar si la fecha y hora están ocupadas
-        $stmt = $conn->prepare("SELECT id FROM citas WHERE fecha=? AND hora=?");
-        $stmt->bind_param("ss", $fecha, $hora);
-        $stmt->execute();
-        $stmt->store_result();
+    // --- VALIDACIONES ---
+    if(!preg_match("/^[0-9]+$/", $telefono)){
+        $mensaje_estado = "<p style='color:red; font-weight:600;'>El teléfono solo debe contener números ❌</p>";
+    }
+    elseif(!filter_var($correo, FILTER_VALIDATE_EMAIL)){
+        $mensaje_estado = "<p style='color:red; font-weight:600;'>Correo inválido ❌</p>";
+    }
+    elseif(strtotime("$fecha $hora") < time()){
+        $mensaje_estado = "<p style='color:red; font-weight:600;'>No se puede agendar en el pasado ❌</p>";
+    }
+    else {
+        // Si pasa validaciones, se envía el mail
+        $destinatario = "araujocanodominicmanuel@gmail.com";
+        $asunto = "Nueva Cita Agendada - Óptica HG-13";
 
-        if($stmt->num_rows > 0){
-            $mensaje_estado = "<p style='color:red;'>Esta fecha y hora ya está ocupada ❌</p>";
+        $mensaje = "
+        <html>
+        <head>
+            <title>Nueva Cita</title>
+        </head>
+        <body style='font-family:Poppins, Arial;'>
+            <h2 style='color:#00C2B8;'>Nueva Cita Agendada</h2>
+            <p><strong>Nombre:</strong> $nombre</p>
+            <p><strong>Teléfono:</strong> $telefono</p>
+            <p><strong>Correo:</strong> $correo</p>
+            <p><strong>Fecha:</strong> $fecha</p>
+            <p><strong>Hora:</strong> $hora</p>
+        </body>
+        </html>
+        ";
+
+        $headers  = "MIME-Version: 1.0" . "\r\n";
+        $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+        $headers .= "From: Óptica HG-13 <noreply@opticahg13.com>" . "\r\n";
+
+        if(mail($destinatario, $asunto, $mensaje, $headers)){
+            $mensaje_estado = "<p style='color:green; font-weight:600;'>Cita enviada correctamente ✅</p>";
         } else {
-            // Insertar en DB
-            $insert = $conn->prepare("INSERT INTO citas (nombre, telefono, correo, fecha, hora) VALUES (?, ?, ?, ?, ?)");
-            $insert->bind_param("sssss", $nombre, $telefono, $correo, $fecha, $hora);
-            if($insert->execute()){
-                $mensaje_estado = "<p style='color:green;'>Cita agendada correctamente ✅</p>";
-            } else {
-                $mensaje_estado = "<p style='color:red;'>Error al guardar la cita ❌</p>";
-            }
-            $insert->close();
+            $mensaje_estado = "<p style='color:red; font-weight:600;'>Error al enviar la cita ❌</p>";
         }
-        $stmt->close();
     }
 }
-
-$conn->close();
 ?>
+
 
 
 <!DOCTYPE html>
