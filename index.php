@@ -238,7 +238,7 @@ footer{
     <nav id="menu">
        
         <a href="montura.php">Monturas</a>
-        <a href="gafasDeSol.php">Gafas de Sol</a>        
+        <a href="GafasDeSol.php">Gafas de Sol</a>        
         <a href="LentesDeContacto.php">Lentes de Contacto</a>
         <a href="accesorios.php">Accesorios</a>
         <a href="cita.php">Agendar Cita</a>
@@ -266,7 +266,7 @@ footer{
         </div>
     </a>
 
-    <a href="gafasDeSol.php">
+    <a href="GafasDeSol.php">
         <div class="card">
             <img src="img/GafasDeSol.jpg">
             <h3>Gafas de Sol</h3>

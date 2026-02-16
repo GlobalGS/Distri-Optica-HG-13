@@ -219,7 +219,7 @@ footer{
 
     <nav id="menu">
         <a href="index.php">Inicio</a>
-        <a href="gafasDeSol.php">Gafas de Sol</a>
+        <a href="GafasDeSol.php">Gafas de Sol</a>
         <a href="LentesDeContacto.php">Lentes de Contacto</a>
         <a href="accesorios.php">Accesorios</a>
         <a href="cita.php">Agendar Cita</a>
