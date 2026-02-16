@@ -1,5 +1,8 @@
 <?php
-$mensaje_estado = "";
+// =================== CONFIGURACIÓN ===================
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 // Conexión a MySQL (Railway)
 $host = "yamanote.proxy.rlwy.net";
@@ -9,11 +12,15 @@ $user = "root";
 $pass = "ugDjPlMtEaIeYiNhBuJFMrrjBRfmRKzT";
 
 $conn = new mysqli($host, $user, $pass, $db, $port);
+
 if ($conn->connect_error) {
     die("Conexión fallida: " . $conn->connect_error);
 }
 
-if($_SERVER["REQUEST_METHOD"] == "POST"){
+$mensaje_estado = "";
+
+// =================== PROCESO DEL FORMULARIO ===================
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $nombre   = htmlspecialchars($_POST['nombre']);
     $telefono = htmlspecialchars($_POST['telefono']);
@@ -22,28 +29,29 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     $hora     = $_POST['hora'];
 
     // Validar correo
-    if(!filter_var($correo, FILTER_VALIDATE_EMAIL)){
-        $mensaje_estado = "<p style='color:red; font-weight:600;'>Correo inválido ❌</p>";
+    if (!filter_var($correo, FILTER_VALIDATE_EMAIL)) {
+        $mensaje_estado = "<p style='color:red;font-weight:600;'>Correo inválido ❌</p>";
     }
-    // Validar fecha/hora no pasada
-    elseif(strtotime("$fecha $hora") < time()){
-        $mensaje_estado = "<p style='color:red; font-weight:600;'>No se puede agendar en el pasado ❌</p>";
-    } else {
-        // Revisar si la fecha/hora ya está ocupada
+    // Validar que la fecha/hora no esté en el pasado
+    elseif (strtotime("$fecha $hora") < time()) {
+        $mensaje_estado = "<p style='color:red;font-weight:600;'>No se puede agendar en el pasado ❌</p>";
+    }
+    else {
+        // Verificar si ya hay una cita en la misma fecha y hora
         $stmt = $conn->prepare("SELECT id FROM citas WHERE fecha=? AND hora=?");
         $stmt->bind_param("ss", $fecha, $hora);
         $stmt->execute();
         $stmt->store_result();
 
-        if($stmt->num_rows > 0){
-            $mensaje_estado = "<p style='color:red; font-weight:600;'>Esta fecha y hora ya está ocupada ❌</p>";
+        if ($stmt->num_rows > 0) {
+            $mensaje_estado = "<p style='color:red;font-weight:600;'>Esta fecha y hora ya está ocupada ❌</p>";
         } else {
-            // Insertar en DB
+            // Insertar en la base de datos
             $insert = $conn->prepare("INSERT INTO citas (nombre, telefono, correo, fecha, hora) VALUES (?, ?, ?, ?, ?)");
             $insert->bind_param("sssss", $nombre, $telefono, $correo, $fecha, $hora);
 
-            if($insert->execute()){
-                // Enviar correo al admin
+            if ($insert->execute()) {
+                // Enviar correo al administrador
                 $destinatario = "araujocanodominicmanuel@gmail.com";
                 $asunto = "Nueva Cita Agendada - Óptica HG-13";
                 $mensaje_mail = "
@@ -65,9 +73,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
                 mail($destinatario, $asunto, $mensaje_mail, $headers);
 
-                $mensaje_estado = "<p style='color:green; font-weight:600;'>Cita agendada correctamente ✅</p>";
+                $mensaje_estado = "<p style='color:green;font-weight:600;'>Cita agendada correctamente ✅</p>";
             } else {
-                $mensaje_estado = "<p style='color:red; font-weight:600;'>Error al guardar la cita ❌</p>";
+                $mensaje_estado = "<p style='color:red;font-weight:600;'>Error al guardar la cita ❌</p>";
             }
 
             $insert->close();
@@ -90,209 +98,51 @@ $conn->close();
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family: 'Poppins', sans-serif;
-}
+/* ===== RESET Y BODY ===== */
+*{margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif;}
+body{background:#fff;}
 
-body{
-    background:#FFFFFF;
-}
-
-/* HEADER */
+/* ===== HEADER ===== */
 header{
-    background:#6EDC5A;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:15px 40px;
-    position:relative;
+    background:#6EDC5A; display:flex; align-items:center; justify-content:space-between; padding:15px 40px; position:relative;
 }
+.logo-area{display:flex; align-items:center; color:white; font-size:22px; font-weight:600;}
+.logo-area img{height:80px; margin-right:15px;}
+nav a{color:white; text-decoration:none; margin-left:25px; font-weight:500;}
+.menu-toggle{display:none; font-size:30px; color:white; cursor:pointer;}
 
-.logo-area{
-    display:flex;
-    align-items:center;
-    color:white;
-    font-size:22px;
-    font-weight:600;
-}
+/* ===== HERO ===== */
+.hero{text-align:center; padding:60px 20px; background:#F4F4F4;}
+.hero h1{color:#00C2B8; font-size:40px; margin-bottom:20px;}
+.hero p{color:#2F2F2F; font-size:18px;}
 
-.logo-area img{
-    height:80px;
-    margin-right:15px;
-}
+/* ===== FORMULARIO ===== */
+.form-container{display:flex; justify-content:center; padding:60px 20px;}
+form{background:white; padding:40px; width:100%; max-width:500px; border-radius:12px; box-shadow:0 5px 20px rgba(0,0,0,0.1);}
+form label{display:block; margin-bottom:8px; font-weight:600; color:#2F2F2F;}
+form input{width:100%; padding:12px; margin-bottom:20px; border-radius:8px; border:1px solid #ccc; font-size:15px;}
+form button{width:100%; padding:14px; background:#6EDC5A; color:white; border:none; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer; transition:0.3s;}
+form button:hover{background:#3BAF3F; transform:scale(1.03);}
+.estado{margin-top:15px;}
 
-nav a{
-    color:white;
-    text-decoration:none;
-    margin-left:25px;
-    font-weight:500;
-}
+/* ===== BOTÓN VOLVER ===== */
+.volver{display:flex; justify-content:center; padding:60px 0; background:#F4F4F4;}
+.volver a{background:#6EDC5A; color:white; padding:14px 35px; text-decoration:none; border-radius:8px; font-weight:600; transition:0.3s;}
+.volver a:hover{background:#3BAF3F; transform:scale(1.05);}
 
-/* HERO */
-.hero{
-    text-align:center;
-    padding:60px 20px;
-    background:#F4F4F4;
-}
+/* ===== FOOTER ===== */
+footer{background:#2F2F2F; color:white; text-align:center; padding:20px;}
 
-.hero h1{
-    color:#00C2B8;
-    font-size:40px;
-    margin-bottom:20px;
-}
-
-.hero p{
-    color:#2F2F2F;
-    font-size:18px;
-}
-
-/* FORMULARIO */
-.form-container{
-    display:flex;
-    justify-content:center;
-    padding:60px 20px;
-}
-
-form{
-    background:white;
-    padding:40px;
-    width:100%;
-    max-width:500px;
-    border-radius:12px;
-    box-shadow:0 5px 20px rgba(0,0,0,0.1);
-}
-
-form label{
-    display:block;
-    margin-bottom:8px;
-    font-weight:600;
-    color:#2F2F2F;
-}
-
-form input{
-    width:100%;
-    padding:12px;
-    margin-bottom:20px;
-    border-radius:8px;
-    border:1px solid #ccc;
-    font-size:15px;
-}
-
-form button{
-    width:100%;
-    padding:14px;
-    background:#6EDC5A;
-    color:white;
-    border:none;
-    border-radius:8px;
-    font-size:16px;
-    font-weight:600;
-    cursor:pointer;
-    transition:0.3s;
-}
-
-form button:hover{
-    background:#3BAF3F;
-    transform:scale(1.03);
-}
-
-.estado{
-    margin-top:15px;
-}
-
-.volver{
-    display:flex;
-    justify-content:center;
-    padding:60px 0;
-    background:#F4F4F4;
-}
-
-.volver a{
-    background:#6EDC5A;
-    color:white;
-    padding:14px 35px;
-    text-decoration:none;
-    border-radius:8px;
-    font-weight:600;
-    transition:0.3s;
-}
-
-.volver a:hover{
-    background:#3BAF3F;
-    transform:scale(1.05);
-}
-
-footer{
-    background:#2F2F2F;
-    color:white;
-    text-align:center;
-    padding:20px;
-}
-
-/* ===== RESPONSIVE HEADER ===== */
-@media (max-width: 768px){
-    header{
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        padding: 15px;
-    }
-
-    .logo-area{
-        flex-direction: column;
-        margin-bottom: 15px;
-    }
-
-    .logo-area img{
-        height: 60px;
-        margin: 0 0 10px 0;
-    }
-
-    nav{
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    nav a{
-        margin: 0;
-        font-size: 16px;
-    }
-}
-
-/* HAMBURGUESA */
-.menu-toggle{
-    display:none;
-    font-size:30px;
-    color:white;
-    cursor:pointer;
-}
-
-@media (max-width: 768px){
-    nav{
-        display:none;
-        flex-direction:column;
-        position:absolute;
-        top:100%;
-        left:0;
-        width:100%;
-        background:#6EDC5A;
-        padding:20px 0;
-        text-align:center;
-    }
-
-    nav a{
-        margin:15px 0;
-        display:block;
-        font-size:18px;
-    }
-
-    .menu-toggle{
-        display:block;
-    }
+/* ===== RESPONSIVE ===== */
+@media (max-width:768px){
+    header{flex-direction:column; align-items:center; text-align:center; padding:15px;}
+    .logo-area{flex-direction:column; margin-bottom:15px;}
+    .logo-area img{height:60px; margin:0 0 10px 0;}
+    nav{display:flex; flex-direction:column; gap:10px;}
+    nav a{margin:0; font-size:16px;}
+    nav{display:none; flex-direction:column; position:absolute; top:100%; left:0; width:100%; background:#6EDC5A; padding:20px 0; text-align:center;}
+    nav a{margin:15px 0; display:block; font-size:18px;}
+    .menu-toggle{display:block;}
 }
 </style>
 </head>
@@ -356,11 +206,7 @@ footer{
 <script>
 function toggleMenu(){
     const menu = document.getElementById("menu");
-    if(menu.style.display === "flex"){
-        menu.style.display = "none";
-    } else {
-        menu.style.display = "flex";
-    }
+    menu.style.display = menu.style.display === "flex" ? "none" : "flex";
 }
 </script>
 
