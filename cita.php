@@ -1,52 +1,52 @@
 <?php
 $mensaje_estado = "";
 
-// Conexión a MySQL en Railway
-$host = 'yamanote.proxy.rlwy.net';
-$port = 50290;
-$db   = 'railway';
-$user = 'root';
-$pass = 'ugDjPlMtEaIeYiNhBuJFMrrjBRfmRKzT';
+// Parsear la URL de conexión
+$mysql_url = "mysql://root:ugDjPlMtEaIeYiNhBuJFMrrjBRfmRKzT@yamanote.proxy.rlwy.net:50290/railway";
+$parts = parse_url($mysql_url);
 
+$host = $parts['host'];       // yamanote.proxy.rlwy.net
+$port = $parts['port'];       // 50290
+$db   = ltrim($parts['path'], '/'); // railway
+$user = $parts['user'];       // root
+$pass = $parts['pass'];       // ugDjPlMtEaIeYiNhBuJFMrrjBRfmRKzT
+
+// Conexión a MySQL
 $conn = new mysqli($host, $user, $pass, $db, $port);
-
 if ($conn->connect_error) {
-    die("<p style='color:red;font-weight:600;'>Conexión fallida a la base de datos: " . $conn->connect_error . "</p>");
+    die("Conexión fallida: " . $conn->connect_error);
 }
 
+// POST del formulario
 if($_SERVER["REQUEST_METHOD"] == "POST"){
-
     $nombre   = htmlspecialchars($_POST['nombre']);
     $telefono = htmlspecialchars($_POST['telefono']);
     $correo   = htmlspecialchars($_POST['correo']);
     $fecha    = $_POST['fecha'];
     $hora     = $_POST['hora'];
 
-    // Validar correo
+    // Validaciones
     if(!filter_var($correo, FILTER_VALIDATE_EMAIL)){
-        $mensaje_estado = "<p style='color:red; font-weight:600;'>Correo inválido ❌</p>";
-    }
-    // Validar fecha/hora no pasada
-    elseif(strtotime("$fecha $hora") < time()){
-        $mensaje_estado = "<p style='color:red; font-weight:600;'>No se puede agendar en el pasado ❌</p>";
+        $mensaje_estado = "<p style='color:red;'>Correo inválido ❌</p>";
+    } elseif(strtotime("$fecha $hora") < time()){
+        $mensaje_estado = "<p style='color:red;'>No se puede agendar en el pasado ❌</p>";
     } else {
-        // Revisar si la fecha/hora ya está ocupada
+        // Revisar si la fecha y hora están ocupadas
         $stmt = $conn->prepare("SELECT id FROM citas WHERE fecha=? AND hora=?");
         $stmt->bind_param("ss", $fecha, $hora);
         $stmt->execute();
         $stmt->store_result();
 
         if($stmt->num_rows > 0){
-            $mensaje_estado = "<p style='color:red; font-weight:600;'>Esta fecha y hora ya está ocupada ❌</p>";
+            $mensaje_estado = "<p style='color:red;'>Esta fecha y hora ya está ocupada ❌</p>";
         } else {
             // Insertar en DB
             $insert = $conn->prepare("INSERT INTO citas (nombre, telefono, correo, fecha, hora) VALUES (?, ?, ?, ?, ?)");
             $insert->bind_param("sssss", $nombre, $telefono, $correo, $fecha, $hora);
-
             if($insert->execute()){
-                $mensaje_estado = "<p style='color:green; font-weight:600;'>Cita agendada correctamente ✅</p>";
+                $mensaje_estado = "<p style='color:green;'>Cita agendada correctamente ✅</p>";
             } else {
-                $mensaje_estado = "<p style='color:red; font-weight:600;'>Error al guardar la cita ❌</p>";
+                $mensaje_estado = "<p style='color:red;'>Error al guardar la cita ❌</p>";
             }
             $insert->close();
         }
@@ -56,6 +56,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
