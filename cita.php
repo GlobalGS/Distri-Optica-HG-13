@@ -4,17 +4,18 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Conexión a MySQL (Railway)
+// Conexión a MySQL con PDO (Railway)
 $host = "yamanote.proxy.rlwy.net";
 $port = 50290;
 $db   = "railway";
 $user = "root";
 $pass = "ugDjPlMtEaIeYiNhBuJFMrrjBRfmRKzT";
 
-$conn = new mysqli($host, $user, $pass, $db, $port);
-
-if ($conn->connect_error) {
-    die("Conexión fallida: " . $conn->connect_error);
+try {
+    $conn = new PDO("mysql:host=$host;port=$port;dbname=$db;charset=utf8", $user, $pass);
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch(PDOException $e) {
+    die("Conexión fallida: " . $e->getMessage());
 }
 
 $mensaje_estado = "";
@@ -37,21 +38,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mensaje_estado = "<p style='color:red;font-weight:600;'>No se puede agendar en el pasado ❌</p>";
     }
     else {
-        // Verificar si ya hay una cita en la misma fecha y hora
-        $stmt = $conn->prepare("SELECT id FROM citas WHERE fecha=? AND hora=?");
-        $stmt->bind_param("ss", $fecha, $hora);
-        $stmt->execute();
-        $stmt->store_result();
+        // Revisar si ya existe la cita
+        $stmt = $conn->prepare("SELECT id FROM citas WHERE fecha=:fecha AND hora=:hora");
+        $stmt->execute(['fecha'=>$fecha,'hora'=>$hora]);
 
-        if ($stmt->num_rows > 0) {
+        if ($stmt->rowCount() > 0) {
             $mensaje_estado = "<p style='color:red;font-weight:600;'>Esta fecha y hora ya está ocupada ❌</p>";
         } else {
-            // Insertar en la base de datos
-            $insert = $conn->prepare("INSERT INTO citas (nombre, telefono, correo, fecha, hora) VALUES (?, ?, ?, ?, ?)");
-            $insert->bind_param("sssss", $nombre, $telefono, $correo, $fecha, $hora);
+            // Insertar cita
+            $insert = $conn->prepare("INSERT INTO citas (nombre, telefono, correo, fecha, hora) VALUES (:nombre, :telefono, :correo, :fecha, :hora)");
+            $res = $insert->execute([
+                'nombre'=>$nombre,
+                'telefono'=>$telefono,
+                'correo'=>$correo,
+                'fecha'=>$fecha,
+                'hora'=>$hora
+            ]);
 
-            if ($insert->execute()) {
-                // Enviar correo al administrador
+            if($res){
+                // Enviar correo
                 $destinatario = "araujocanodominicmanuel@gmail.com";
                 $asunto = "Nueva Cita Agendada - Óptica HG-13";
                 $mensaje_mail = "
@@ -77,16 +82,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } else {
                 $mensaje_estado = "<p style='color:red;font-weight:600;'>Error al guardar la cita ❌</p>";
             }
-
-            $insert->close();
         }
-
-        $stmt->close();
     }
 }
-
-$conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="es">
