@@ -1,17 +1,17 @@
-# Usamos PHP 8.2 con Apache
+# Imagen base con PHP 8 y Apache
 FROM php:8.2-apache
 
-# Instalar extensiones necesarias para MySQL
-RUN docker-php-ext-install mysqli pdo pdo_mysql
+# Instalar mysqli para conectarse a MySQL
+RUN docker-php-ext-install mysqli
 
-# Habilitar mod_rewrite (opcional, útil para URLs bonitas)
-RUN a2enmod rewrite
-
-# Copiar todo el proyecto al contenedor
+# Copiar tu proyecto al contenedor
 COPY . /var/www/html/
 
-# Ajustar permisos
+# Asegurarse de permisos correctos
 RUN chown -R www-data:www-data /var/www/html
 
-# Exponer el puerto 80
+# Exponer el puerto 80 para la web
 EXPOSE 80
+
+# Comando por defecto de Apache
+CMD ["apache2-foreground"]

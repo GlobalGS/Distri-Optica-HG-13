@@ -1,16 +1,17 @@
 <?php
 $mensaje_estado = "";
 
-// Conexión a MySQL usando variables de Railway
-$host = getenv('MYSQLHOST') ?: 'yamanote.proxy.rlwy.net';
-$port = getenv('MYSQLPORT') ?: 50290;
-$db   = getenv('MYSQLDB')   ?: 'railway';
-$user = getenv('MYSQLUSER') ?: 'root';
-$pass = getenv('MYSQLPASSWORD') ?: 'ugDjPlMtEaIeYiNhBuJFMrrjBRfmRKzT';
+// Conexión a MySQL en Railway
+$host = 'yamanote.proxy.rlwy.net';
+$port = 50290;
+$db   = 'railway';
+$user = 'root';
+$pass = 'ugDjPlMtEaIeYiNhBuJFMrrjBRfmRKzT';
 
 $conn = new mysqli($host, $user, $pass, $db, $port);
+
 if ($conn->connect_error) {
-    die("Conexión fallida: " . $conn->connect_error);
+    die("<p style='color:red;font-weight:600;'>Conexión fallida a la base de datos: " . $conn->connect_error . "</p>");
 }
 
 if($_SERVER["REQUEST_METHOD"] == "POST"){
@@ -64,7 +65,6 @@ $conn->close();
 <title>Agendar Cita - Óptica HG-13</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
-/* ===== Estilos internos ===== */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 body{background:#fff;}
 header{background:#6EDC5A;display:flex;align-items:center;justify-content:space-between;padding:15px 40px;position:relative;}
