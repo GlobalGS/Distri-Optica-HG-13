@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Monturas - Óptica HG-13</title>
+<title>Lentes de Contacto - Óptica HG-13</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-
 *{
     margin:0;
     padding:0;
@@ -27,9 +26,8 @@ header{
     align-items:center;
     justify-content:space-between;
     padding:15px 40px;
-    position:relative; /* 👈 ESTO ES LO QUE FALTA */
+    position:relative;
 }
-
 
 .logo-area{
     display:flex;
@@ -126,16 +124,15 @@ nav a{
     transform:scale(1.05);
 }
 
-
 footer{
     background:#2F2F2F;
     color:white;
     text-align:center;
     padding:20px;
 }
-/* ===== RESPONSIVE HEADER ===== */
-@media (max-width: 768px){
 
+/* RESPONSIVE HEADER */
+@media (max-width: 768px){
     header{
         flex-direction: column;
         align-items: center;
@@ -163,8 +160,8 @@ footer{
         margin: 0;
         font-size: 16px;
     }
-
 }
+
 /* HAMBURGUESA OCULTA EN PC */
 .menu-toggle{
     display:none;
@@ -173,9 +170,8 @@ footer{
     cursor:pointer;
 }
 
-/* RESPONSIVE */
+/* RESPONSIVE HAMBURGUESA */
 @media (max-width: 768px){
-
     nav{
         display:none;
         flex-direction:column;
@@ -197,10 +193,7 @@ footer{
     .menu-toggle{
         display:block;
     }
-
 }
-
-
 </style>
 </head>
 <body>
@@ -213,41 +206,38 @@ footer{
     </div>
 
     <!-- BOTÓN HAMBURGUESA -->
-    <div class="menu-toggle" onclick="toggleMenu()">
-        ☰
-    </div>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
 
     <nav id="menu">
         <a href="index.php">Inicio</a>
-        <a href="gafasDeSol.php">Gafas de Sol</a>
-        <a href="LentesDeContacto.php">Lentes de Contacto</a>
+        <a href="montura.php">Monturas</a>
+        <a href="gafasDeSol.php">Gafas de Sol</a>     
         <a href="accesorios.php">Accesorios</a>
-        <a href="cita.php">Agendar Cita</a>
+        <a href="cita.php">Agendar Cita</a> 
     </nav>
 
 </header>
 
-
 <section class="hero">
-    <h1>Nuestras Monturas</h1>
-    <p>Diseños modernos, cómodos y de alta calidad para todos los estilos.</p>
+    <h1>Nuestros Lentes de Contacto</h1>
+    <p>Comodidad, seguridad y visión clara para todos los estilos.</p>
 </section>
 
 <section class="galeria">
 
     <div class="producto">
-        <img src="img/Montura.jpg">
-        <h3>Montura Clásica</h3>
+        <img src="img/LentesDeContacto.jpg">
+        <h3>Lentes de Contacto Diario</h3>
     </div>
 
     <div class="producto">
-        <img src="img/Montura.jpg">
-        <h3>Montura Moderna</h3>
+        <img src="img/LentesDeContacto.jpg">
+        <h3>Lentes de Contacto Mensual</h3>
     </div>
 
     <div class="producto">
-        <img src="img/Montura.jpg">
-        <h3>Montura Premium</h3>
+        <img src="img/LentesDeContacto.jpg">
+        <h3>Lentes de Contacto Color</h3>
     </div>
 
 </section>
@@ -259,14 +249,11 @@ footer{
 <footer>
 © 2026 Óptica HG-13 - Todos los derechos reservados
 </footer>
+
 <script>
 function toggleMenu(){
     const menu = document.getElementById("menu");
-    if(menu.style.display === "flex"){
-        menu.style.display = "none";
-    } else {
-        menu.style.display = "flex";
-    }
+    menu.style.display = menu.style.display === "flex" ? "none" : "flex";
 }
 </script>
 

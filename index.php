@@ -236,9 +236,11 @@ footer{
     <div class="menu-toggle" onclick="toggleMenu()">☰</div>
 
     <nav id="menu">
-        <a href="index.php">Inicio</a>
+       
         <a href="montura.php">Monturas</a>
-        <a href="gafasDeSol.php">Gafas de Sol</a>
+        <a href="gafasDeSol.php">Gafas de Sol</a>        
+        <a href="LentesDeContacto.php">Lentes de Contacto</a>
+        <a href="accesorios.php">Accesorios</a>
         <a href="cita.php">Agendar Cita</a>
     </nav>
 
@@ -269,8 +271,22 @@ footer{
             <img src="img/GafasDeSol.jpg">
             <h3>Gafas de Sol</h3>
         </div>
+    </a>  
+    
+    <a href="LentesDeContacto.php">
+        <div class="card">
+            <img src="img/LentesDeContacto.jpg">
+            <h3>Lentes de Contacto</h3>
+        </div>
     </a>
-
+    
+    <a href="accesorios.php">
+        <div class="card">
+            <img src="img/Accesorios.png">
+            <h3>Accesorios</h3>
+        </div>
+    </a>
+    
     <a href="cita.php">
         <div class="card">
             <img src="img/AgendarCita.jpg">

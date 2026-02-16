@@ -1,43 +1,83 @@
 <?php
 $mensaje_estado = "";
 
+// Conexión a MySQL (Railway)
+$host = "yamanote.proxy.rlwy.net";
+$port = 50290;
+$db   = "railway";
+$user = "root";
+$pass = "ugDjPlMtEaIeYiNhBuJFMrrjBRfmRKzT";
+
+$conn = new mysqli($host, $user, $pass, $db, $port);
+if ($conn->connect_error) {
+    die("Conexión fallida: " . $conn->connect_error);
+}
+
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 
     $nombre   = htmlspecialchars($_POST['nombre']);
     $telefono = htmlspecialchars($_POST['telefono']);
     $correo   = htmlspecialchars($_POST['correo']);
-    $fecha    = htmlspecialchars($_POST['fecha']);
-    $hora     = htmlspecialchars($_POST['hora']);
+    $fecha    = $_POST['fecha'];
+    $hora     = $_POST['hora'];
 
-    $destinatario = "araujocanodominicmanuel@gmail.com";
-    $asunto = "Nueva Cita Agendada - Óptica HG-13";
-
-    $mensaje = "
-    <html>
-    <head>
-        <title>Nueva Cita</title>
-    </head>
-    <body style='font-family:Poppins, Arial;'>
-        <h2 style='color:#00C2B8;'>Nueva Cita Agendada</h2>
-        <p><strong>Nombre:</strong> $nombre</p>
-        <p><strong>Teléfono:</strong> $telefono</p>
-        <p><strong>Correo:</strong> $correo</p>
-        <p><strong>Fecha:</strong> $fecha</p>
-        <p><strong>Hora:</strong> $hora</p>
-    </body>
-    </html>
-    ";
-
-    $headers  = "MIME-Version: 1.0" . "\r\n";
-    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
-    $headers .= "From: Óptica HG-13 <noreply@opticahg13.com>" . "\r\n";
-
-    if(mail($destinatario, $asunto, $mensaje, $headers)){
-        $mensaje_estado = "<p style='color:green; font-weight:600;'>Cita enviada correctamente ✅</p>";
+    // Validar correo
+    if(!filter_var($correo, FILTER_VALIDATE_EMAIL)){
+        $mensaje_estado = "<p style='color:red; font-weight:600;'>Correo inválido ❌</p>";
+    }
+    // Validar fecha/hora no pasada
+    elseif(strtotime("$fecha $hora") < time()){
+        $mensaje_estado = "<p style='color:red; font-weight:600;'>No se puede agendar en el pasado ❌</p>";
     } else {
-        $mensaje_estado = "<p style='color:red; font-weight:600;'>Error al enviar la cita ❌</p>";
+        // Revisar si la fecha/hora ya está ocupada
+        $stmt = $conn->prepare("SELECT id FROM citas WHERE fecha=? AND hora=?");
+        $stmt->bind_param("ss", $fecha, $hora);
+        $stmt->execute();
+        $stmt->store_result();
+
+        if($stmt->num_rows > 0){
+            $mensaje_estado = "<p style='color:red; font-weight:600;'>Esta fecha y hora ya está ocupada ❌</p>";
+        } else {
+            // Insertar en DB
+            $insert = $conn->prepare("INSERT INTO citas (nombre, telefono, correo, fecha, hora) VALUES (?, ?, ?, ?, ?)");
+            $insert->bind_param("sssss", $nombre, $telefono, $correo, $fecha, $hora);
+
+            if($insert->execute()){
+                // Enviar correo al admin
+                $destinatario = "araujocanodominicmanuel@gmail.com";
+                $asunto = "Nueva Cita Agendada - Óptica HG-13";
+                $mensaje_mail = "
+                <html>
+                <head><title>Nueva Cita</title></head>
+                <body style='font-family:Poppins, Arial;'>
+                    <h2 style='color:#00C2B8;'>Nueva Cita Agendada</h2>
+                    <p><strong>Nombre:</strong> $nombre</p>
+                    <p><strong>Teléfono:</strong> $telefono</p>
+                    <p><strong>Correo:</strong> $correo</p>
+                    <p><strong>Fecha:</strong> $fecha</p>
+                    <p><strong>Hora:</strong> $hora</p>
+                </body>
+                </html>";
+
+                $headers  = "MIME-Version: 1.0" . "\r\n";
+                $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+                $headers .= "From: Óptica HG-13 <noreply@opticahg13.com>" . "\r\n";
+
+                mail($destinatario, $asunto, $mensaje_mail, $headers);
+
+                $mensaje_estado = "<p style='color:green; font-weight:600;'>Cita agendada correctamente ✅</p>";
+            } else {
+                $mensaje_estado = "<p style='color:red; font-weight:600;'>Error al guardar la cita ❌</p>";
+            }
+
+            $insert->close();
+        }
+
+        $stmt->close();
     }
 }
+
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -50,7 +90,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
-
 *{
     margin:0;
     padding:0;
@@ -69,9 +108,8 @@ header{
     align-items:center;
     justify-content:space-between;
     padding:15px 40px;
-    position:relative; /* 👈 ESTO ES LO QUE FALTA */
+    position:relative;
 }
-
 
 .logo-area{
     display:flex;
@@ -193,9 +231,9 @@ footer{
     text-align:center;
     padding:20px;
 }
+
 /* ===== RESPONSIVE HEADER ===== */
 @media (max-width: 768px){
-
     header{
         flex-direction: column;
         align-items: center;
@@ -223,9 +261,9 @@ footer{
         margin: 0;
         font-size: 16px;
     }
-
 }
-/* HAMBURGUESA OCULTA EN PC */
+
+/* HAMBURGUESA */
 .menu-toggle{
     display:none;
     font-size:30px;
@@ -233,9 +271,7 @@ footer{
     cursor:pointer;
 }
 
-/* RESPONSIVE */
 @media (max-width: 768px){
-
     nav{
         display:none;
         flex-direction:column;
@@ -257,35 +293,27 @@ footer{
     .menu-toggle{
         display:block;
     }
-
 }
-
-
 </style>
 </head>
 <body>
 
 <header>
-
     <div class="logo-area">
         <img src="img/OpticaLogo.png">
-        <span>ÓPTICA</span>
+        <span>ÓPTICA HG-13</span>
     </div>
 
-    <!-- BOTÓN HAMBURGUESA -->
-    <div class="menu-toggle" onclick="toggleMenu()">
-        ☰
-    </div>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
 
     <nav id="menu">
         <a href="index.php">Inicio</a>
         <a href="montura.php">Monturas</a>
         <a href="gafasDeSol.php">Gafas de Sol</a>
-        <a href="cita.php">Agendar Cita</a>
+        <a href="LentesDeContacto.php">Lentes de Contacto</a>
+        <a href="accesorios.php">Accesorios</a>
     </nav>
-
 </header>
-
 
 <section class="hero">
     <h1>Agenda tu Cita</h1>
@@ -294,7 +322,6 @@ footer{
 
 <div class="form-container">
     <form method="POST">
-
         <label>Nombre Completo</label>
         <input type="text" name="nombre" required>
 
@@ -315,7 +342,6 @@ footer{
         <div class="estado">
             <?php echo $mensaje_estado; ?>
         </div>
-
     </form>
 </div>
 
@@ -326,6 +352,7 @@ footer{
 <footer>
 © 2026 Óptica HG-13 - Todos los derechos reservados
 </footer>
+
 <script>
 function toggleMenu(){
     const menu = document.getElementById("menu");
