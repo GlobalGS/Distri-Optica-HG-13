@@ -9,27 +9,29 @@
 
 <style>
 
+/* RESET */
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
-    font-family: 'Poppins', sans-serif;
+    font-family:'Poppins', sans-serif;
 }
 
 body{
     background:#FFFFFF;
 }
 
-/* HEADER */
+/* ================= HEADER ================= */
+
 header{
     background:#6EDC5A;
     display:flex;
     align-items:center;
-    justify-content:space-between; /* separa logo y menú */
+    justify-content:space-between;
     padding:15px 40px;
+    position:relative;
 }
 
-/* LOGO AREA */
 .logo-area{
     display:flex;
     align-items:center;
@@ -39,16 +41,18 @@ header{
 }
 
 .logo-area img{
-    height:80px;
-    width:auto;
+    height:70px;
     margin-right:15px;
 }
 
-/* MENÚ */
+nav{
+    display:flex;
+    gap:25px;
+}
+
 nav a{
     color:white;
     text-decoration:none;
-    margin-left:25px;
     font-weight:500;
     transition:0.3s;
 }
@@ -57,58 +61,65 @@ nav a:hover{
     color:#2F2F2F;
 }
 
+.menu-toggle{
+    display:none;
+    font-size:30px;
+    color:white;
+    cursor:pointer;
+}
 
+/* ================= SLIDER ================= */
 
-/* SLIDER */
 .slider{
     width:100%;
-    height:80vh; /* ocupa casi toda la pantalla */
+    height:75vh;
     overflow:hidden;
 }
 
 .slides{
     display:flex;
-    width:400%;
     height:100%;
     animation:slide 16s infinite;
 }
 
 .slides img{
-    width:100vw;      /* ancho completo de la pantalla */
+    flex:0 0 100%;
+    width:100%;
     height:100%;
-    object-fit:cover; /* llena sin deformar */
+    object-fit:cover;
 }
 
-
-
+/* Animación correcta */
 @keyframes slide{
-    0%{margin-left:0;}
-    20%{margin-left:0;}
-    25%{margin-left:-100%;}
-    45%{margin-left:-100%;}
-    50%{margin-left:-200%;}
-    70%{margin-left:-200%;}
-    75%{margin-left:-300%;}
-    95%{margin-left:-300%;}
+    0%,20%{transform:translateX(0);}
+    25%,45%{transform:translateX(-100%);}
+    50%,70%{transform:translateX(-200%);}
+    75%,95%{transform:translateX(-300%);}
 }
 
-/* BOTONES */
+/* ================= SECCIONES ================= */
+
 .secciones{
     display:flex;
     justify-content:center;
-    gap:30px;
-    padding:50px;
+    gap:40px;
+    padding:70px 20px;
     background:#F4F4F4;
+    flex-wrap:wrap;
+}
+
+.secciones a{
+    text-decoration:none;
 }
 
 .card{
-    position:relative;
-    width:300px;
-    height:250px;
+    width:320px;
+    height:260px;
+    border-radius:18px;
     overflow:hidden;
-    border-radius:12px;
-    cursor:pointer;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
     transition:0.3s;
+    position:relative;
 }
 
 .card img{
@@ -125,11 +136,14 @@ nav a:hover{
     position:absolute;
     bottom:0;
     width:100%;
+    padding:18px;
     background:rgba(0,0,0,0.6);
     color:white;
     text-align:center;
-    padding:15px;
+    font-size:20px;
 }
+
+/* ================= FOOTER ================= */
 
 footer{
     background:#2F2F2F;
@@ -138,24 +152,97 @@ footer{
     padding:20px;
 }
 
+/* ================= RESPONSIVE ================= */
+
+@media (max-width:768px){
+
+    nav{
+        display:none;
+        flex-direction:column;
+        position:absolute;
+        top:100%;
+        left:0;
+        width:100%;
+        background:#6EDC5A;
+        padding:20px 0;
+        text-align:center;
+        z-index:1000;
+    }
+
+    nav a{
+        padding:12px 0;
+        font-size:18px;
+    }
+
+    .menu-toggle{
+        display:block;
+    }
+
+    .slider{
+        height:50vh;
+    }
+
+    .secciones{
+        flex-direction:column;
+        align-items:center;
+    }
+
+    .card{
+        width:90%;
+        max-width:360px;
+        height:230px;
+    }
+}
+.secciones{
+    display:flex;
+    justify-content:center;
+    align-items:stretch; /* 🔥 importante */
+    gap:40px;
+    padding:70px 20px;
+    background:#F4F4F4;
+    flex-wrap:wrap;
+}
+
+.secciones a{
+    display:flex;          /* 🔥 clave */
+    flex:1;                /* todos ocupan lo mismo */
+    max-width:320px;
+    justify-content:center;
+    text-decoration:none;
+}
+
+.card{
+    width:100%;            /* 🔥 que ocupe todo el ancho del <a> */
+    height:260px;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 10px 25px rgba(0,0,0,0.08);
+    transition:0.3s;
+    position:relative;
+}
+
+
 </style>
 </head>
 <body>
 
 <header>
+
     <div class="logo-area">
         <img src="img/OpticaLogo.png">
-        <span>ÓPTICA HG-13</span>
+        <span>ÓPTICA</span>
     </div>
 
-    <nav>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+
+    <nav id="menu">
         <a href="index.php">Inicio</a>
         <a href="montura.php">Monturas</a>
         <a href="gafasDeSol.php">Gafas de Sol</a>
         <a href="cita.php">Agendar Cita</a>
     </nav>
-</header>
 
+</header>
 
 <!-- SLIDER -->
 <div class="slider">
@@ -167,7 +254,7 @@ footer{
     </div>
 </div>
 
-<!-- BOTONES -->
+<!-- SECCIONES -->
 <div class="secciones">
     
     <a href="montura.php">
@@ -196,6 +283,13 @@ footer{
 <footer>
 © 2026 Óptica HG-13 - Todos los derechos reservados
 </footer>
+
+<script>
+function toggleMenu(){
+    const menu = document.getElementById("menu");
+    menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+}
+</script>
 
 </body>
 </html>

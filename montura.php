@@ -27,7 +27,9 @@ header{
     align-items:center;
     justify-content:space-between;
     padding:15px 40px;
+    position:relative; /* 👈 ESTO ES LO QUE FALTA */
 }
+
 
 .logo-area{
     display:flex;
@@ -131,24 +133,99 @@ footer{
     text-align:center;
     padding:20px;
 }
+/* ===== RESPONSIVE HEADER ===== */
+@media (max-width: 768px){
+
+    header{
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 15px;
+    }
+
+    .logo-area{
+        flex-direction: column;
+        margin-bottom: 15px;
+    }
+
+    .logo-area img{
+        height: 60px;
+        margin: 0 0 10px 0;
+    }
+
+    nav{
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    nav a{
+        margin: 0;
+        font-size: 16px;
+    }
+
+}
+/* HAMBURGUESA OCULTA EN PC */
+.menu-toggle{
+    display:none;
+    font-size:30px;
+    color:white;
+    cursor:pointer;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px){
+
+    nav{
+        display:none;
+        flex-direction:column;
+        position:absolute;
+        top:100%;
+        left:0;
+        width:100%;
+        background:#6EDC5A;
+        padding:20px 0;
+        text-align:center;
+    }
+
+    nav a{
+        margin:15px 0;
+        display:block;
+        font-size:18px;
+    }
+
+    .menu-toggle{
+        display:block;
+    }
+
+}
+
 
 </style>
 </head>
 <body>
 
 <header>
+
     <div class="logo-area">
         <img src="img/OpticaLogo.png">
-        <span>ÓPTICA HG-13</span>
+        <span>ÓPTICA</span>
     </div>
 
-    <nav>
+    <!-- BOTÓN HAMBURGUESA -->
+    <div class="menu-toggle" onclick="toggleMenu()">
+        ☰
+    </div>
+
+    <nav id="menu">
         <a href="index.php">Inicio</a>
-        <a href="monturas.php">Monturas</a>
+        <a href="montura.php">Monturas</a>
         <a href="gafasDeSol.php">Gafas de Sol</a>
         <a href="cita.php">Agendar Cita</a>
     </nav>
+
 </header>
+
 
 <section class="hero">
     <h1>Nuestras Monturas</h1>
@@ -181,6 +258,16 @@ footer{
 <footer>
 © 2026 Óptica HG-13 - Todos los derechos reservados
 </footer>
+<script>
+function toggleMenu(){
+    const menu = document.getElementById("menu");
+    if(menu.style.display === "flex"){
+        menu.style.display = "none";
+    } else {
+        menu.style.display = "flex";
+    }
+}
+</script>
 
 </body>
 </html>

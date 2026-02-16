@@ -1,3 +1,45 @@
+<?php
+$mensaje_estado = "";
+
+if($_SERVER["REQUEST_METHOD"] == "POST"){
+
+    $nombre   = htmlspecialchars($_POST['nombre']);
+    $telefono = htmlspecialchars($_POST['telefono']);
+    $correo   = htmlspecialchars($_POST['correo']);
+    $fecha    = htmlspecialchars($_POST['fecha']);
+    $hora     = htmlspecialchars($_POST['hora']);
+
+    $destinatario = "araujocanodominicmanuel@gmail.com";
+    $asunto = "Nueva Cita Agendada - Óptica HG-13";
+
+    $mensaje = "
+    <html>
+    <head>
+        <title>Nueva Cita</title>
+    </head>
+    <body style='font-family:Poppins, Arial;'>
+        <h2 style='color:#00C2B8;'>Nueva Cita Agendada</h2>
+        <p><strong>Nombre:</strong> $nombre</p>
+        <p><strong>Teléfono:</strong> $telefono</p>
+        <p><strong>Correo:</strong> $correo</p>
+        <p><strong>Fecha:</strong> $fecha</p>
+        <p><strong>Hora:</strong> $hora</p>
+    </body>
+    </html>
+    ";
+
+    $headers  = "MIME-Version: 1.0" . "\r\n";
+    $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+    $headers .= "From: Óptica HG-13 <noreply@opticahg13.com>" . "\r\n";
+
+    if(mail($destinatario, $asunto, $mensaje, $headers)){
+        $mensaje_estado = "<p style='color:green; font-weight:600;'>Cita enviada correctamente ✅</p>";
+    } else {
+        $mensaje_estado = "<p style='color:red; font-weight:600;'>Error al enviar la cita ❌</p>";
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -27,7 +69,9 @@ header{
     align-items:center;
     justify-content:space-between;
     padding:15px 40px;
+    position:relative; /* 👈 ESTO ES LO QUE FALTA */
 }
+
 
 .logo-area{
     display:flex;
@@ -90,7 +134,7 @@ form label{
     color:#2F2F2F;
 }
 
-form input, form select{
+form input{
     width:100%;
     padding:12px;
     margin-bottom:20px;
@@ -117,7 +161,10 @@ form button:hover{
     transform:scale(1.03);
 }
 
-/* BOTÓN VOLVER */
+.estado{
+    margin-top:15px;
+}
+
 .volver{
     display:flex;
     justify-content:center;
@@ -146,24 +193,99 @@ footer{
     text-align:center;
     padding:20px;
 }
+/* ===== RESPONSIVE HEADER ===== */
+@media (max-width: 768px){
+
+    header{
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 15px;
+    }
+
+    .logo-area{
+        flex-direction: column;
+        margin-bottom: 15px;
+    }
+
+    .logo-area img{
+        height: 60px;
+        margin: 0 0 10px 0;
+    }
+
+    nav{
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    nav a{
+        margin: 0;
+        font-size: 16px;
+    }
+
+}
+/* HAMBURGUESA OCULTA EN PC */
+.menu-toggle{
+    display:none;
+    font-size:30px;
+    color:white;
+    cursor:pointer;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px){
+
+    nav{
+        display:none;
+        flex-direction:column;
+        position:absolute;
+        top:100%;
+        left:0;
+        width:100%;
+        background:#6EDC5A;
+        padding:20px 0;
+        text-align:center;
+    }
+
+    nav a{
+        margin:15px 0;
+        display:block;
+        font-size:18px;
+    }
+
+    .menu-toggle{
+        display:block;
+    }
+
+}
+
 
 </style>
 </head>
 <body>
 
 <header>
+
     <div class="logo-area">
         <img src="img/OpticaLogo.png">
-        <span>ÓPTICA HG-13</span>
+        <span>ÓPTICA</span>
     </div>
 
-    <nav>
+    <!-- BOTÓN HAMBURGUESA -->
+    <div class="menu-toggle" onclick="toggleMenu()">
+        ☰
+    </div>
+
+    <nav id="menu">
         <a href="index.php">Inicio</a>
-        <a href="monturas.php">Monturas</a>
+        <a href="montura.php">Monturas</a>
         <a href="gafasDeSol.php">Gafas de Sol</a>
         <a href="cita.php">Agendar Cita</a>
     </nav>
+
 </header>
+
 
 <section class="hero">
     <h1>Agenda tu Cita</h1>
@@ -171,8 +293,8 @@ footer{
 </section>
 
 <div class="form-container">
-    <form action="#" method="POST">
-        
+    <form method="POST">
+
         <label>Nombre Completo</label>
         <input type="text" name="nombre" required>
 
@@ -190,6 +312,10 @@ footer{
 
         <button type="submit">Agendar Cita</button>
 
+        <div class="estado">
+            <?php echo $mensaje_estado; ?>
+        </div>
+
     </form>
 </div>
 
@@ -200,6 +326,16 @@ footer{
 <footer>
 © 2026 Óptica HG-13 - Todos los derechos reservados
 </footer>
+<script>
+function toggleMenu(){
+    const menu = document.getElementById("menu");
+    if(menu.style.display === "flex"){
+        menu.style.display = "none";
+    } else {
+        menu.style.display = "flex";
+    }
+}
+</script>
 
 </body>
 </html>
